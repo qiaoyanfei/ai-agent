@@ -1,0 +1,13 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+uploads/*
+!uploads/.gitkeep
+backend/.pytest_cache/
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+*.iml
+.DS_Store

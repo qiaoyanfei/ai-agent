@@ -1,0 +1,143 @@
+# 知库 iOS 云端打包（macOS 14 + Xcode 15，可装到 iOS 18 真机）
+#
+# 签名打包（推荐，可安装到手机）需在 GitHub Secrets 配置：
+#   IOS_P12_BASE64          - 开发/发布证书 .p12 的 base64
+#   IOS_P12_PASSWORD        - 导出 p12 时的密码
+#   IOS_PROFILE_BASE64      - 含本机 UDID 的 .mobileprovision 的 base64
+#   APPLE_TEAM_ID           - Apple 团队 ID（10 位）
+#   KEYCHAIN_PASSWORD       - 任意强密码（CI 临时钥匙串用）
+#
+# 未配置签名时：仅产出未签名 .app（需在新 Mac 上用 Xcode 自行签名）
+#
+# 详细步骤见 docs/IOS_CI.md
+
+name: iOS Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_host:
+        description: 写入 App 的 API 局域网 IP
+        required: false
+        default: "192.168.1.8"
+  push:
+    branches: [main, master]
+    paths:
+      - "mobile/**"
+      - ".github/workflows/ios-build.yml"
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.24.5"
+          cache: true
+          cache-key: flutter-3.24.5
+          pub-cache-key: mobile-pub
+
+      - name: Flutter pub get
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: CocoaPods install
+        working-directory: mobile/ios
+        run: pod install
+
+      - name: Import code signing (optional)
+        if: ${{ secrets.IOS_P12_BASE64 != '' && secrets.IOS_PROFILE_BASE64 != '' }}
+        env:
+          IOS_P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
+          IOS_P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
+          IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERT_PATH="$RUNNER_TEMP/build.p12"
+          PP_PATH="$RUNNER_TEMP/profile.mobileprovision"
+          KC="$RUNNER_TEMP/ci.keychain-db"
+          echo -n "$IOS_P12_BASE64" | base64 --decode -o "$CERT_PATH"
+          echo -n "$IOS_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KC"
+          security import "$CERT_PATH" -P "$IOS_P12_PASSWORD" -A -t cert -f pkcs12 -k "$KC"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KC"
+          security list-keychain -d user -s "$KC"
+          PP_XML=$(security cms -D -i "$PP_PATH")
+          PP_UUID=$(/usr/libexec/PlistBuddy -c 'Print UUID' /dev/stdin <<< "$PP_XML")
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/"$PP_UUID.mobileprovision"
+          echo "PROFILE_UUID=$PP_UUID" >> "$GITHUB_ENV"
+
+      - name: Patch Xcode signing for CI
+        if: ${{ secrets.IOS_P12_BASE64 != '' && secrets.IOS_PROFILE_BASE64 != '' && secrets.APPLE_TEAM_ID != '' }}
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        working-directory: mobile/ios
+        run: |
+          PBX=Runner.xcodeproj/project.pbxproj
+          SIGN_BLOCK="DEVELOPMENT_TEAM = ${APPLE_TEAM_ID}; CODE_SIGN_STYLE = Manual; PROVISIONING_PROFILE_SPECIFIER = ${PROFILE_UUID}; CODE_SIGN_IDENTITY = \"Apple Development\";"
+          sed -i.bak "s/PRODUCT_BUNDLE_IDENTIFIER = com.aiagent.mindVault;/PRODUCT_BUNDLE_IDENTIFIER = com.aiagent.mindVault; ${SIGN_BLOCK}/" "$PBX"
+          /usr/libexec/PlistBuddy -c "Add :teamID string ${APPLE_TEAM_ID}" ExportOptions.plist 2>/dev/null \
+            || /usr/libexec/PlistBuddy -c "Set :teamID ${APPLE_TEAM_ID}" ExportOptions.plist
+
+      - name: Build signed IPA
+        if: ${{ secrets.IOS_P12_BASE64 != '' && secrets.IOS_PROFILE_BASE64 != '' && secrets.APPLE_TEAM_ID != '' }}
+        working-directory: mobile
+        env:
+          API_HOST: ${{ github.event.inputs.api_host || '192.168.1.8' }}
+        run: |
+          flutter build ipa --release \
+            --dart-define=API_HOST="$API_HOST" \
+            --export-options-plist=ios/ExportOptions.plist
+
+      - name: Build unsigned iOS (no secrets)
+        if: ${{ secrets.IOS_P12_BASE64 == '' || secrets.IOS_PROFILE_BASE64 == '' }}
+        working-directory: mobile
+        env:
+          API_HOST: ${{ github.event.inputs.api_host || '192.168.1.8' }}
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=API_HOST="$API_HOST"
+          cd build/ios/iphoneos && zip -r "$GITHUB_WORKSPACE/zhiku-ios-unsigned.app.zip" Runner.app
+
+      - name: Upload signed IPA
+        if: ${{ secrets.IOS_P12_BASE64 != '' && secrets.IOS_PROFILE_BASE64 != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: zhiku-ios-ipa
+          path: mobile/build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload unsigned app
+        if: ${{ secrets.IOS_P12_BASE64 == '' || secrets.IOS_PROFILE_BASE64 == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: zhiku-ios-unsigned
+          path: zhiku-ios-unsigned.app.zip
+          retention-days: 14
+
+      - name: Summary
+        run: |
+          if [ -n "${{ secrets.IOS_P12_BASE64 }}" ]; then
+            echo "### 已构建签名 IPA" >> "$GITHUB_STEP_SUMMARY"
+            echo "在 Actions → Artifacts 下载 **zhiku-ios-ipa**，用 Apple Configurator / Xcode 设备安装。" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### 已构建未签名包" >> "$GITHUB_STEP_SUMMARY"
+            echo "下载 **zhiku-ios-unsigned**，需在装有 Xcode 15+ 的 Mac 上签名后才能装到 iPhone。" >> "$GITHUB_STEP_SUMMARY"
+            echo "配置 Secrets 后可自动产出可安装的 IPA，见 docs/IOS_CI.md" >> "$GITHUB_STEP_SUMMARY"
+          fi

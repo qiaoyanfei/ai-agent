@@ -1,0 +1,85 @@
+# 知库 iOS — AltStore 用未签名 IPA（免费 Apple ID，无需 GitHub Secrets）
+#
+# 用法：Actions → iOS AltStore IPA → Run workflow → 下载 Artifact → AltStore 安装
+# 说明：docs/IOS_ALTSTORE.md
+
+name: iOS AltStore IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_host:
+        description: 写入 App 的 API 局域网 IP（手机与电脑同一 WiFi）
+        required: false
+        default: "192.168.1.8"
+
+concurrency:
+  group: ios-altstore-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-unsigned-ipa:
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.24.5"
+          cache: true
+
+      - name: Flutter pub get
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: CocoaPods install
+        working-directory: mobile/ios
+        run: pod install
+
+      - name: Build iOS (no codesign)
+        working-directory: mobile
+        env:
+          API_HOST: ${{ github.event.inputs.api_host || '192.168.1.8' }}
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=API_HOST="$API_HOST"
+
+      - name: Package unsigned IPA for AltStore
+        working-directory: mobile
+        run: |
+          set -euo pipefail
+          APP="build/ios/iphoneos/Runner.app"
+          if [ ! -d "$APP" ]; then
+            echo "::error::未找到 $APP，请检查 Flutter 构建输出路径"
+            ls -la build/ios/ || true
+            exit 1
+          fi
+          rm -rf build/altstore-payload build/altstore-ipa
+          mkdir -p build/altstore-payload/Payload
+          cp -R "$APP" build/altstore-payload/Payload/Runner.app
+          cd build/altstore-payload
+          zip -qr ../altstore-ipa/zhiku-altstore.ipa Payload
+          ls -lh ../altstore-ipa/
+
+      - name: Upload AltStore IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: zhiku-ios-altstore-ipa
+          path: mobile/build/altstore-ipa/zhiku-altstore.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Summary
+        env:
+          API_HOST: ${{ github.event.inputs.api_host || '192.168.1.8' }}
+        run: |
+          {
+            echo "### AltStore 未签名 IPA 已就绪"
+            echo ""
+            echo "- **Artifact**：\`zhiku-ios-altstore-ipa\` → \`zhiku-altstore.ipa\`"
+            echo "- **API_HOST**：\`$API_HOST\`"
+            echo "- **下一步**：按 [docs/IOS_ALTSTORE.md](../blob/main/docs/IOS_ALTSTORE.md) 用 AltStore 安装（免费 Apple ID，约 7 天续签）"
+          } >> "$GITHUB_STEP_SUMMARY"

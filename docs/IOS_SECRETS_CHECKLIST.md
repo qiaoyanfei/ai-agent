@@ -1,5 +1,7 @@
 # iOS 云端打包 — 你提供这些，我帮你核对
 
+> **不付费、不配 Secrets**：请改用 **[IOS_ALTSTORE.md](./IOS_ALTSTORE.md)**（AltStore + `ios-altstore-ipa.yml`）。
+
 ## 当前进度
 
 - [x] iPhone UDID：`00008030-000C153E0203802E`

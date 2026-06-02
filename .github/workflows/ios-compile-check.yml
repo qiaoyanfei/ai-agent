@@ -38,4 +38,9 @@ jobs:
             --dart-define=API_HOST=192.168.1.8
 
       - name: Summary
-        run: echo "### iOS 编译通过（未签名，不能装真机）" >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          {
+            echo "### iOS 编译通过（未签名）"
+            echo ""
+            echo "要装到 iPhone：请 Run **iOS AltStore IPA** workflow，见 docs/IOS_ALTSTORE.md"
+          } >> "$GITHUB_STEP_SUMMARY"

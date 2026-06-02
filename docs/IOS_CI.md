@@ -1,6 +1,9 @@
-# iOS 云端打包（GitHub Actions）— 可安装 IPA
+# iOS 云端打包（GitHub Actions）— 已签名 IPA（付费开发者）
 
-你的 Mac（macOS 12 + Xcode 14）**无法**给 iOS 18 真机装调试包，但可以在 GitHub 上用 **macOS 15 + Xcode 16** 云端编译出 **已签名 IPA**，下载后装到 iPhone。
+> **推荐（免费）**：自用 iPhone 请走 **[IOS_ALTSTORE.md](./IOS_ALTSTORE.md)** — GitHub 打未签名 IPA + AltStore，**无需 ¥688/年、无需 GitHub Secrets**。  
+> Workflow：https://github.com/qiaoyanfei/ai-agent/actions/workflows/ios-altstore-ipa.yml
+
+你的 Mac（macOS 12 + Xcode 14）**无法**给 iOS 18 真机装调试包。若已加入 **Apple Developer Program**，可在 GitHub 上用 **macOS 15 + Xcode 16** 云端编译 **已签名 IPA**，下载后装到 iPhone。
 
 ## 一、你要做的事（两步）
 

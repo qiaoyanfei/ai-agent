@@ -58,7 +58,7 @@ jobs:
             exit 1
           fi
           rm -rf build/altstore-payload build/altstore-ipa
-          mkdir -p build/altstore-payload/Payload
+          mkdir -p build/altstore-payload/Payload build/altstore-ipa
           cp -R "$APP" build/altstore-payload/Payload/Runner.app
           cd build/altstore-payload
           zip -qr ../altstore-ipa/zhiku-altstore.ipa Payload

@@ -20,11 +20,7 @@ on:
         description: 写入 App 的 API 局域网 IP
         required: false
         default: "192.168.1.8"
-  push:
-    branches: [main, master]
-    paths:
-      - "mobile/**"
-      - ".github/workflows/ios-build.yml"
+  # 可安装 IPA 仅手动触发（需配齐 Secrets），见 ios-compile-check.yml 做 push 编译检查
 
 concurrency:
   group: ios-build-${{ github.ref }}
@@ -115,16 +111,6 @@ jobs:
             --dart-define=API_HOST="$API_HOST" \
             --export-options-plist=ios/ExportOptions.plist
 
-      - name: Build unsigned iOS (no secrets)
-        if: ${{ secrets.IOS_P12_BASE64 == '' || secrets.IOS_PROFILE_BASE64 == '' }}
-        working-directory: mobile
-        env:
-          API_HOST: ${{ github.event.inputs.api_host || '192.168.1.8' }}
-        run: |
-          flutter build ios --release --no-codesign \
-            --dart-define=API_HOST="$API_HOST"
-          cd build/ios/iphoneos && zip -r "$GITHUB_WORKSPACE/zhiku-ios-unsigned.app.zip" Runner.app
-
       - name: Upload signed IPA
         if: ${{ secrets.IOS_P12_BASE64 != '' && secrets.IOS_PROFILE_BASE64 != '' }}
         uses: actions/upload-artifact@v4
@@ -134,21 +120,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Upload unsigned app
-        if: ${{ secrets.IOS_P12_BASE64 == '' || secrets.IOS_PROFILE_BASE64 == '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: zhiku-ios-unsigned
-          path: zhiku-ios-unsigned.app.zip
-          retention-days: 14
-
       - name: Summary
         run: |
-          if [ -n "${{ secrets.IOS_P12_BASE64 }}" ]; then
-            echo "### 已构建签名 IPA" >> "$GITHUB_STEP_SUMMARY"
-            echo "在 Actions → Artifacts 下载 **zhiku-ios-ipa**，用 Apple Configurator / Xcode 设备安装。" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "### 已构建未签名包" >> "$GITHUB_STEP_SUMMARY"
-            echo "下载 **zhiku-ios-unsigned**，需在装有 Xcode 15+ 的 Mac 上签名后才能装到 iPhone。" >> "$GITHUB_STEP_SUMMARY"
-            echo "配置 Secrets 后可自动产出可安装的 IPA，见 docs/IOS_CI.md" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          echo "### 已构建签名 IPA" >> "$GITHUB_STEP_SUMMARY"
+          echo "在 Artifacts 下载 **zhiku-ios-ipa**，用 Apple Configurator 安装到 guomeng 的 iPhone。" >> "$GITHUB_STEP_SUMMARY"

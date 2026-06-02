@@ -1,0 +1,41 @@
+# iOS 编译检查（无需签名 Secrets，push 时自动跑）
+name: iOS Compile Check
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "mobile/**"
+      - ".github/workflows/ios-compile-check.yml"
+  workflow_dispatch:
+
+jobs:
+  compile:
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.24.5"
+          cache: true
+
+      - name: Flutter pub get
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: CocoaPods install
+        working-directory: mobile/ios
+        run: pod install
+
+      - name: Build iOS (no codesign)
+        working-directory: mobile
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=API_HOST=192.168.1.8
+
+      - name: Summary
+        run: echo "### iOS 编译通过（未签名，不能装真机）" >> "$GITHUB_STEP_SUMMARY"

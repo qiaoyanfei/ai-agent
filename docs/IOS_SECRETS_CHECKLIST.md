@@ -1,5 +1,14 @@
 # iOS 云端打包 — 你提供这些，我帮你核对
 
+## 当前进度
+
+- [x] iPhone UDID：`00008030-000C153E0203802E`
+- [ ] Team ID（待你提供）
+- [ ] CSR → 开发证书 → p12
+- [ ] 描述文件 `.mobileprovision`
+- [ ] GitHub 5 个 Secrets
+- [ ] Run workflow 下载 IPA
+
 按顺序完成，每步做完可在对话里告诉我「第 N 步好了」。
 
 ## 第 1 步：Team ID（待发我）

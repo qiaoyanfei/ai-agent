@@ -11,3 +11,4 @@ mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 *.iml
 .DS_Store
+.ios-secrets-export/

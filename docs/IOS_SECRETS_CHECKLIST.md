@@ -2,29 +2,19 @@
 
 按顺序完成，每步做完可在对话里告诉我「第 N 步好了」。
 
-## 第 1 步：Team ID（发给我 10 位字符）
+## 第 1 步：Team ID（待发我）
 
 1. 打开 https://developer.apple.com/account  
 2. 登录 Apple ID  
-3. **Membership**（或「账户」）→ 复制 **Team ID**  
+3. **Membership** → 复制 **Team ID**（10 位）  
 
-发我：`Team ID = __________`
+发我：`Team ID = __________`（你说稍后再弄，可先跳过）
 
 ---
 
-## 第 2 步：iPhone UDID（发给我）
+## 第 2 步：iPhone UDID（已完成）
 
-**方式 A（推荐）**：iPhone 连 Mac，终端执行：
-
-```bash
-/Applications/Xcode.app/Contents/Developer/usr/bin/xcrun xctrace list devices
-```
-
-找到 `guomeng的iPhone` 后面括号里那一串，形如 `00008030-000C153E0203802E`。
-
-**方式 B**：Apple Configurator 2 选中设备查看 UDID。
-
-发我：`UDID = __________`
+`00008030-000C153E0203802E` — guomeng的 iPhone (iOS 18.1.1)
 
 ---
 

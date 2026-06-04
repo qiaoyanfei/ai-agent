@@ -1,0 +1,145 @@
+page {
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+  --primary-light: #eef2ff;
+  --surface: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 28rpx;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+}
+
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 16rpx rgba(15, 23, 42, 0.06);
+  border: 1rpx solid var(--border);
+}
+
+.card:active {
+  opacity: 0.92;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+  color: #fff !important;
+  border: none;
+  border-radius: 20rpx;
+  font-weight: 600;
+  font-size: 30rpx;
+  padding: 0 32rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+}
+
+.btn-primary[disabled] {
+  opacity: 0.55;
+}
+
+.btn-ghost {
+  background: var(--primary-light);
+  color: var(--primary) !important;
+  border: none;
+  border-radius: 20rpx;
+  font-weight: 500;
+}
+
+.input {
+  background: var(--card);
+  border: 2rpx solid var(--border);
+  border-radius: 20rpx;
+  padding: 24rpx 28rpx;
+  font-size: 28rpx;
+  color: var(--text);
+}
+
+.input:focus {
+  border-color: var(--primary);
+}
+
+.err {
+  color: var(--danger);
+  font-size: 24rpx;
+  margin-top: 16rpx;
+  text-align: center;
+}
+
+.empty-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 48rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 32rpx;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 56rpx;
+  line-height: 120rpx;
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.empty-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12rpx;
+}
+
+.empty-sub {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 520rpx;
+}
+
+.fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: calc(48rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(135deg, var(--primary), #6366f1);
+  color: #fff;
+  border-radius: 48rpx;
+  padding: 20rpx 36rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 32rpx rgba(79, 70, 229, 0.4);
+  z-index: 10;
+}
+
+.fab:active {
+  transform: scale(0.98);
+}
+
+.status-ready {
+  color: var(--success);
+}
+
+.status-pending {
+  color: var(--warning);
+}
+
+.status-failed {
+  color: var(--danger);
+}

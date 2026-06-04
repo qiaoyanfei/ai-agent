@@ -1,0 +1,33 @@
+<view class="page editor-page">
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="spinner" />
+  </view>
+
+  <view class="err banner-err" wx:elif="{{error}}">{{error}}</view>
+
+  <block wx:else>
+    <view class="field" wx:if="{{isCreate}}">
+      <text class="label">文件名</text>
+      <input class="input" placeholder="例如：笔记.md" value="{{filename}}" bindinput="onFilename" />
+    </view>
+    <view class="filename-readonly" wx:else>{{filename}}</view>
+
+    <view class="field flex-grow">
+      <text class="label">Markdown 正文</text>
+      <textarea
+        class="editor-area"
+        value="{{content}}"
+        bindinput="onContent"
+        maxlength="-1"
+        auto-height="{{false}}"
+        disabled="{{!editable}}"
+      />
+    </view>
+
+    <view class="footer">
+      <button class="btn-primary save-btn" loading="{{saving}}" disabled="{{saving || !editable}}" bindtap="save">
+        保存
+      </button>
+    </view>
+  </block>
+</view>

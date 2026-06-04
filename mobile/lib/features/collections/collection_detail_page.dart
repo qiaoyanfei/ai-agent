@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/api_client.dart';
 import '../../core/api_error.dart';
+import '../../core/doc_utils.dart';
 import '../../core/theme.dart';
 import '../../widgets/doc_tile.dart';
 import '../../widgets/empty_state.dart';
@@ -109,6 +110,55 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
     context.push('/collections/${widget.collectionId}/chat');
   }
 
+  Future<void> _createMarkdown() async {
+    final ok = await context.push<bool>(
+      '/collections/${widget.collectionId}/documents/new',
+    );
+    if (ok == true) await _loadDocuments();
+  }
+
+  Future<void> _editDocument(Map<String, dynamic> doc) async {
+    final id = doc['id'] as int?;
+    final name = doc['filename'] as String? ?? '';
+    if (id == null || !isEditableDocumentFilename(name)) return;
+    final ok = await context.push<bool>(
+      '/collections/${widget.collectionId}/documents/$id/edit',
+    );
+    if (ok == true) await _loadDocuments();
+  }
+
+  void _showAddMenu() {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_note_outlined),
+              title: const Text('新建 Markdown'),
+              subtitle: const Text('在应用内编写 .md 文档'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _createMarkdown();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.upload_file_outlined),
+              title: const Text('上传文件'),
+              subtitle: const Text('PDF、TXT、Markdown'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _upload();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _deleteDocument(Map<String, dynamic> doc) async {
     final id = doc['id'] as int?;
     final name = doc['filename'] as String? ?? '文档';
@@ -194,8 +244,8 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
                                     icon: Icons.upload_file_outlined,
                                     title: '还没有文档',
                                     subtitle: '支持 PDF、TXT、Markdown',
-                                    actionLabel: '上传文档',
-                                    onAction: _upload,
+                                    actionLabel: '添加文档',
+                                    onAction: _showAddMenu,
                                   ),
                                 ),
                               );
@@ -210,6 +260,7 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
                                 filename: d['filename'] as String? ?? '',
                                 status: d['status'] as String? ?? '',
                                 errorMessage: d['error_message'] as String?,
+                                onTap: () => _editDocument(d),
                                 onDelete: () => _deleteDocument(d),
                               );
                             },
@@ -219,9 +270,9 @@ class _CollectionDetailPageState extends State<CollectionDetailPage> {
               ],
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _upload,
-        icon: const Icon(Icons.upload_file),
-        label: const Text('上传'),
+        onPressed: _showAddMenu,
+        icon: const Icon(Icons.add),
+        label: const Text('添加'),
       ),
     );
   }

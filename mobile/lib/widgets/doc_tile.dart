@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/doc_utils.dart';
 import '../core/theme.dart';
 import 'status_chip.dart';
 
@@ -9,12 +10,14 @@ class DocTile extends StatelessWidget {
     required this.filename,
     required this.status,
     this.errorMessage,
+    this.onTap,
     this.onDelete,
   });
 
   final String filename;
   final String status;
   final String? errorMessage;
+  final VoidCallback? onTap;
   final VoidCallback? onDelete;
 
   IconData _fileIcon() {
@@ -26,9 +29,13 @@ class DocTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canEdit = isEditableDocumentFilename(filename);
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
+      child: InkWell(
+        onTap: canEdit ? onTap : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,6 +91,7 @@ class DocTile extends StatelessWidget {
                 onPressed: onDelete,
               ),
           ],
+        ),
         ),
       ),
     );

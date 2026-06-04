@@ -10,6 +10,7 @@ import 'features/auth/login_page.dart';
 import 'features/chat/chat_page.dart';
 import 'features/collections/collection_detail_page.dart';
 import 'features/collections/collections_page.dart';
+import 'features/documents/document_editor_page.dart';
 import 'features/documents/document_preview_page.dart';
 import 'features/settings/settings_page.dart';
 import 'providers/app_providers.dart';
@@ -35,6 +36,21 @@ Future<GoRouter> createRouter() async {
         builder: (_, state) {
           final id = int.parse(state.pathParameters['id']!);
           return ChatPage(collectionId: id);
+        },
+      ),
+      GoRoute(
+        path: '/collections/:id/documents/new',
+        builder: (_, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return DocumentEditorPage(collectionId: id);
+        },
+      ),
+      GoRoute(
+        path: '/collections/:id/documents/:docId/edit',
+        builder: (_, state) {
+          final collectionId = int.parse(state.pathParameters['id']!);
+          final docId = int.parse(state.pathParameters['docId']!);
+          return DocumentEditorPage(collectionId: collectionId, documentId: docId);
         },
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsPage()),

@@ -1,0 +1,30 @@
+<view class="page login-page">
+  <view class="hero">
+    <view class="logo">知</view>
+    <view class="brand">知库 MindVault</view>
+    <view class="tagline">上传文档 · 智能问答 · 可追溯引用</view>
+  </view>
+
+  <view class="panel">
+    <view class="tabs">
+      <view class="tab {{mode === 'login' ? 'on' : ''}}" bindtap="setLogin">登录</view>
+      <view class="tab {{mode === 'register' ? 'on' : ''}}" bindtap="setRegister">注册</view>
+    </view>
+
+    <view class="field">
+      <text class="label">邮箱</text>
+      <input class="input" placeholder="your@email.com" value="{{email}}" bindinput="onEmail" />
+    </view>
+    <view class="field">
+      <text class="label">密码</text>
+      <input class="input" password placeholder="至少 6 位" value="{{password}}" bindinput="onPassword" />
+    </view>
+
+    <button class="btn-primary submit" loading="{{loading}}" disabled="{{loading}}" bindtap="submit">
+      {{mode === 'login' ? '登录' : '创建账号'}}
+    </button>
+    <view class="err" wx:if="{{error}}">{{error}}</view>
+  </view>
+
+  <view class="footer">与 App 共用同一账号与知识库</view>
+</view>

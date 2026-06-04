@@ -1,0 +1,95 @@
+<view class="chat-page">
+  <view class="chat-toolbar">
+    <view class="tool-btn" bindtap="openHistory">历史</view>
+    <view class="tool-btn" bindtap="newChat">新对话</view>
+  </view>
+
+  <scroll-view
+    scroll-y
+    class="messages"
+    scroll-into-view="{{scrollIntoView}}"
+    scroll-with-animation
+  >
+    <view class="empty-wrap" wx:if="{{messages.length === 0 && !streaming}}">
+      <view class="empty-icon">💬</view>
+      <view class="empty-title">向知识库提问</view>
+      <view class="empty-sub">回答将基于已就绪的文档，并标注引用来源</view>
+      <view class="suggestions">
+        <view
+          class="chip"
+          wx:for="{{suggestions}}"
+          wx:key="*this"
+          data-text="{{item}}"
+          bindtap="useSuggestion"
+        >{{item}}</view>
+      </view>
+    </view>
+
+    <view
+      wx:for="{{messages}}"
+      wx:key="index"
+      id="msg-{{index}}"
+      class="bubble-row {{item.role === 'user' ? 'user' : 'assistant'}}"
+    >
+      <view class="bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+        <block wx:if="{{item.role === 'user'}}">
+          <text user-select>{{item.content}}</text>
+        </block>
+        <block wx:else>
+          <text wx:if="{{item.isStreaming && !item.segments.length}}" user-select>{{item.content}}</text>
+          <text wx:elif="{{!item.segments.length}}" user-select>{{item.content || '…'}}</text>
+          <view wx:else class="bubble-content">
+            <block wx:for="{{item.segments}}" wx:for-item="seg" wx:for-index="si" wx:key="si">
+              <text wx:if="{{seg.type === 'text'}}" user-select>{{seg.text}}</text>
+              <text
+                wx:else
+                class="cite-link {{seg.chunkId ? '' : 'cite-disabled'}}"
+                data-chunk="{{seg.chunkId}}"
+                data-ref="{{seg.ref}}"
+                catchtap="onCitationTap"
+              >[{{seg.ref}}]</text>
+            </block>
+          </view>
+          <view class="typing" wx:if="{{item.isStreaming}}">▍</view>
+        </block>
+      </view>
+    </view>
+    <view class="scroll-pad" id="msg-bottom" />
+  </scroll-view>
+
+  <view class="composer">
+    <textarea
+      class="composer-input"
+      placeholder="输入问题…"
+      value="{{inputText}}"
+      bindinput="onInput"
+      auto-height
+      maxlength="-1"
+      disabled="{{streaming}}"
+    />
+    <button class="send-btn" disabled="{{streaming || !canSend}}" bindtap="send">发送</button>
+  </view>
+
+  <view class="drawer-mask" wx:if="{{showHistory}}" bindtap="closeHistory">
+    <view class="drawer" catchtap="noop">
+      <view class="drawer-head">
+        <text class="drawer-title">历史会话</text>
+        <text class="drawer-new" bindtap="newChatFromDrawer">新对话</text>
+      </view>
+      <view class="drawer-loading" wx:if="{{loadingHistory}}">加载中…</view>
+      <view class="drawer-empty" wx:elif="{{conversations.length === 0}}">暂无历史会话</view>
+      <scroll-view wx:else scroll-y class="drawer-list">
+        <view
+          wx:for="{{conversations}}"
+          wx:key="id"
+          class="conv-item {{item.id === conversationId ? 'selected' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="loadConversation"
+        >
+          <view class="conv-title">{{item.title || '新对话'}}</view>
+          <view class="conv-time">{{item.timeText}}</view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

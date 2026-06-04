@@ -46,6 +46,25 @@ class DocumentResponse(BaseModel):
     created_at: datetime
 
 
+class DocumentTextCreate(BaseModel):
+    """新建 Markdown 文档（应用内编辑，非上传文件）。"""
+
+    filename: str = Field(min_length=1, max_length=200)
+    content: str = Field(min_length=1)
+
+
+class DocumentContentResponse(BaseModel):
+    id: int
+    collection_id: int
+    filename: str
+    content: str
+    editable: bool
+
+
+class DocumentContentUpdate(BaseModel):
+    content: str = Field(min_length=1)
+
+
 class ChatRequest(BaseModel):
     collection_id: int
     message: str

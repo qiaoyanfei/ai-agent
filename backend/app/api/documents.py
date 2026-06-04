@@ -6,7 +6,13 @@ from fastapi.responses import FileResponse
 from sqlmodel import Session, delete, select
 
 from app.api.deps import get_current_user
-from app.api.schemas import ChunkSourceResponse, DocumentResponse
+from app.api.schemas import (
+    ChunkSourceResponse,
+    DocumentContentResponse,
+    DocumentContentUpdate,
+    DocumentResponse,
+    DocumentTextCreate,
+)
 from app.core.config import settings
 from app.db.session import get_session
 from app.models import Collection, Document, DocumentChunk, DocumentStatus, User
@@ -15,6 +21,40 @@ from app.services.document_processor import process_document_task
 router = APIRouter(tags=["documents"])
 
 ALLOWED_SUFFIX = {".pdf", ".txt", ".md", ".markdown"}
+EDITABLE_SUFFIX = {".md", ".markdown", ".txt"}
+MAX_TEXT_BYTES = 2 * 1024 * 1024  # 2MB
+
+
+def _normalize_md_filename(filename: str) -> str:
+    name = (filename or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="文件名不能为空")
+    suffix = Path(name).suffix.lower()
+    if suffix in {".md", ".markdown"}:
+        return name
+    if suffix and suffix not in ALLOWED_SUFFIX:
+        raise HTTPException(status_code=400, detail="新建文档仅支持 .md / .markdown")
+    if "." not in Path(name).name:
+        return f"{name}.md"
+    raise HTTPException(status_code=400, detail="新建文档请使用 .md 扩展名")
+
+
+def _is_content_editable(filename: str) -> bool:
+    return Path(filename).suffix.lower() in EDITABLE_SUFFIX
+
+
+def _write_document_file(doc: Document, content: str) -> None:
+    data = content.encode("utf-8")
+    if len(data) > MAX_TEXT_BYTES:
+        raise HTTPException(status_code=400, detail="文档内容超过 2MB 限制")
+    dest_dir = Path(settings.upload_dir) / str(doc.collection_id) / str(doc.id)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    path = dest_dir / doc.filename
+    path.write_bytes(data)
+
+
+def _schedule_process(background_tasks: BackgroundTasks, document_id: int) -> None:
+    background_tasks.add_task(process_document_task, document_id)
 
 
 def _file_type(filename: str) -> str:
@@ -107,6 +147,44 @@ async def upload_document(
     )
 
 
+@router.post("/collections/{collection_id}/documents/text", response_model=DocumentResponse)
+async def create_text_document(
+    collection_id: int,
+    body: DocumentTextCreate,
+    background_tasks: BackgroundTasks,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    """新建 Markdown 文档并写入内容，后台解析入库。"""
+    _get_owned_collection(session, user, collection_id)
+    filename = _normalize_md_filename(body.filename)
+    content = body.content.strip()
+    if not content:
+        raise HTTPException(status_code=400, detail="内容不能为空")
+
+    doc = Document(
+        collection_id=collection_id,
+        filename=filename,
+        content_type="text/markdown",
+        status=DocumentStatus.pending,
+    )
+    session.add(doc)
+    session.commit()
+    session.refresh(doc)
+
+    _write_document_file(doc, content)
+    _schedule_process(background_tasks, doc.id)
+
+    return DocumentResponse(
+        id=doc.id,
+        collection_id=doc.collection_id,
+        filename=doc.filename,
+        status=doc.status,
+        error_message=doc.error_message,
+        created_at=doc.created_at,
+    )
+
+
 @router.get("/documents/{document_id}", response_model=DocumentResponse)
 def get_document(
     document_id: int,
@@ -114,6 +192,61 @@ def get_document(
     session: Session = Depends(get_session),
 ):
     doc = _get_owned_document(session, user, document_id)
+    return DocumentResponse(
+        id=doc.id,
+        collection_id=doc.collection_id,
+        filename=doc.filename,
+        status=doc.status,
+        error_message=doc.error_message,
+        created_at=doc.created_at,
+    )
+
+
+@router.get("/documents/{document_id}/content", response_model=DocumentContentResponse)
+def get_document_content(
+    document_id: int,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    doc = _get_owned_document(session, user, document_id)
+    editable = _is_content_editable(doc.filename)
+    content = ""
+    if editable:
+        path = _document_path(doc)
+        if path.exists():
+            content = path.read_text(encoding="utf-8", errors="ignore")
+    return DocumentContentResponse(
+        id=doc.id,
+        collection_id=doc.collection_id,
+        filename=doc.filename,
+        content=content,
+        editable=editable,
+    )
+
+
+@router.put("/documents/{document_id}/content", response_model=DocumentResponse)
+async def update_document_content(
+    document_id: int,
+    body: DocumentContentUpdate,
+    background_tasks: BackgroundTasks,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    doc = _get_owned_document(session, user, document_id)
+    if not _is_content_editable(doc.filename):
+        raise HTTPException(status_code=400, detail="PDF 等文件请重新上传，不支持在线编辑")
+    content = body.content.strip()
+    if not content:
+        raise HTTPException(status_code=400, detail="内容不能为空")
+
+    _write_document_file(doc, content)
+    doc.status = DocumentStatus.pending
+    doc.error_message = ""
+    session.add(doc)
+    session.commit()
+    session.refresh(doc)
+    _schedule_process(background_tasks, doc.id)
+
     return DocumentResponse(
         id=doc.id,
         collection_id=doc.collection_id,

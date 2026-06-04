@@ -22,7 +22,8 @@
 2. 点 **Run workflow**  
 3. `api_host` 填你电脑的 **局域网 IP**（手机和电脑同一 WiFi，例如 `192.168.1.8`）  
 4. 等约 10–20 分钟，运行变绿 ✓  
-5. 进入该次运行 → **Artifacts** → 下载 **zhiku-ios-altstore-ipa**（内有 `zhiku-altstore.ipa`）
+5. 进入该次运行 → **Artifacts** → 下载 **zhiku-ios-altstore-ipa**（浏览器会得到 `.zip`）
+6. **双击解压 zip**，得到 **`zhiku-altstore.ipa`**（⚠️ 不要把外层 zip 改扩展名成 `.ipa`）
 
 改 API 地址后需重新 Run workflow 并重新安装。
 
@@ -57,7 +58,7 @@
 
 ### 方式 A：电脑 AltServer 侧载（推荐）
 
-1. 解压 Artifact，得到 `zhiku-altstore.ipa`  
+1. 解压下载的 **`zhiku-ios-altstore-ipa.zip`**，使用里面的 **`zhiku-altstore.ipa`**（不是把 zip 改名为 ipa）  
 2. AltServer 菜单 → **Sideload .ipa…**（或 **Install .ipa**）  
 3. 选 `zhiku-altstore.ipa`，同一 Apple ID 登录  
 4. 等完成后，主屏幕出现 **知库**
@@ -82,7 +83,8 @@
 
 3. **信任与权限**  
    - 若 App 闪退：检查 VPN 与设备管理里是否仍信任  
-   - 首次打开允许网络访问  
+   - **设置 → 知库 → 本地网络** → 打开（iOS 14+，否则无法连 `192.168.x.x:8000`）  
+   - 注册/登录报 Connection failed 时，先在 Safari 试 `http://你的IP:8000/health`  
 
 ---
 
@@ -90,12 +92,33 @@
 
 | 现象 | 处理 |
 |------|------|
+| `unknown tag html` / `data is not in the correct format` | 见下方 **「登录失败 html」** |
 | AltServer 找不到设备 | 换 USB；Windows 确认 iTunes/iCloud 已装；解锁手机 |
 | `Could not connect to AltServer` | 同一 WiFi；关 VPN；电脑 AltServer 是否在运行 |
 | 安装失败 / 已达上限 | 免费 ID 同时约 3 个应用，删掉旧的再装 |
 | App 7 天后打不开 | AltStore → Refresh All（AltServer 要开着） |
 | 知库连不上 API | 核对 workflow 里的 `api_host`；后端是否 `:8000` 监听 `0.0.0.0` |
 | 想改 API 地址 | 重新 Run workflow → 下载新 ipa → 再侧载（会覆盖同 Bundle ID） |
+
+### 登录失败 html（关 Clash / 换热点仍失败）
+
+1. **系统代理可能仍在**：Clash 退出后，Mac 有时仍保留 `127.0.0.1:8118`。终端检查：
+   ```bash
+   scutil --proxy | grep Enable
+   ```
+   若有 `HTTPEnable : 1`，在终端执行（或 **系统偏好设置 → 网络 → Wi‑Fi → 高级 → 代理** 全部取消）：
+   ```bash
+   networksetup -setwebproxystate Wi-Fi off
+   networksetup -setsecurewebproxystate Wi-Fi off
+   networksetup -setsocksfirewallproxystate Wi-Fi off
+   ```
+   然后 `killall AltServer; open /Applications/AltServer.app` 再试。
+
+2. **国内直连常失败**：若关掉代理后仍 html，需 **Clash 全局或规则** 放行 `gsa.apple.com`、`*.apple.com`（见正文网络说明）。
+
+3. **Mac 未登录 iCloud**：**系统偏好设置 → 登录 Apple ID**。未登录时 AltServer 易认证失败；弹窗里仍填要给手机签名用的 ID + **App 专用密码**。
+
+4. **仍不行**：试 [Sideloadly](https://sideloadly.io) 直接侧载 `zhiku-altstore.ipa`（可不装 AltStore App）；或改走 Android / Web。
 
 ---
 

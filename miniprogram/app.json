@@ -1,0 +1,21 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/collections/collections",
+    "pages/collection-detail/collection-detail",
+    "pages/document-editor/document-editor",
+    "pages/chat/chat",
+    "pages/preview/preview",
+    "pages/settings/settings"
+  ],
+  "window": {
+    "navigationBarTitleText": "知库",
+    "navigationBarBackgroundColor": "#4f46e5",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f8fafc",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

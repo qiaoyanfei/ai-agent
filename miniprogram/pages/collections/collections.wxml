@@ -1,0 +1,83 @@
+<view class="page">
+  <view class="header-bar">
+    <view class="user-block" wx:if="{{email}}">
+      <view class="avatar">{{avatarLetter}}</view>
+      <view class="user-meta">
+        <text class="user-email">{{email}}</text>
+        <text class="user-hint">{{collections.length}} 个知识库</text>
+      </view>
+    </view>
+    <view class="header-actions">
+      <view class="icon-btn {{refreshing ? 'spinning' : ''}}" bindtap="onRefresh">↻</view>
+      <view class="icon-btn" bindtap="goSettings">⚙</view>
+      <view class="icon-btn primary" bindtap="openCreate">＋</view>
+    </view>
+  </view>
+
+  <scroll-view
+    scroll-y
+    class="page-scroll"
+    refresher-enabled
+    refresher-background="#f8fafc"
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+  >
+    <view class="loading-wrap" wx:if="{{loading && !refreshing}}">
+      <view class="spinner" />
+      <text>加载中…</text>
+    </view>
+
+    <view class="err banner-err" wx:elif="{{error}}">
+      <text>{{error}}</text>
+      <button class="btn-ghost retry-btn" bindtap="onRefresh">点击重试</button>
+    </view>
+
+    <view class="empty-wrap" wx:elif="{{!loading && collections.length === 0}}">
+      <view class="empty-icon">📚</view>
+      <view class="empty-title">还没有知识库</view>
+      <view class="empty-sub">下拉可刷新；或创建第一个知识库开始用</view>
+      <button class="btn-primary" style="margin-top:48rpx;width:360rpx;" bindtap="openCreate">创建知识库</button>
+    </view>
+
+    <view class="list-inner" wx:else>
+      <view
+        class="card collection-card"
+        wx:for="{{collections}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="openCollection"
+      >
+        <view class="col-icon">📁</view>
+        <view class="col-body">
+          <view class="col-name">{{item.name}}</view>
+          <view class="col-desc">{{item.description || '暂无描述'}}</view>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
+    <view class="scroll-footer">
+      <text wx:if="{{collections.length > 0 && !loading}}">下拉刷新列表</text>
+    </view>
+  </scroll-view>
+
+  <view class="fab" wx:if="{{collections.length > 0 && !loading}}" bindtap="openCreate">＋ 新建</view>
+
+  <view class="modal-mask" wx:if="{{showCreate}}" bindtap="closeCreate">
+    <view class="modal" catchtap="noop">
+      <view class="modal-title">新建知识库</view>
+      <view class="field">
+        <text class="label">名称</text>
+        <input class="input" placeholder="例如：产品文档" value="{{createName}}" bindinput="onCreateName" focus="{{showCreate}}" />
+      </view>
+      <view class="field">
+        <text class="label">描述（可选）</text>
+        <textarea class="input textarea" placeholder="简要说明用途" value="{{createDesc}}" bindinput="onCreateDesc" />
+      </view>
+      <view class="modal-actions">
+        <button class="btn-ghost modal-btn" bindtap="closeCreate">取消</button>
+        <button class="btn-primary modal-btn" loading="{{creating}}" bindtap="submitCreate">创建</button>
+      </view>
+    </view>
+  </view>
+</view>

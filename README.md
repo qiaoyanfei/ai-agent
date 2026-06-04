@@ -10,6 +10,8 @@
 ai-agent/
 ├── backend/          # FastAPI + RAG
 ├── mobile/           # Flutter (Riverpod + GoRouter + Dio)
+├── web/              # React + Vite 浏览器端
+├── miniprogram/      # 微信小程序
 ├── docker-compose.yml
 ├── uploads/          # 上传文件
 └── .env              # 环境变量（从 .env.example 复制）
@@ -63,6 +65,17 @@ flutter run -d chrome   # 或 macos / android
 
 修改 `mobile/lib/core/config.dart` 中的 `apiBaseUrl`（Android 模拟器用 `http://10.0.2.2:8000`）。
 
+### 4. 启动 Web
+
+**与后端同一套 Docker（推荐试完整链路）：**
+
+```bash
+docker compose up -d --build
+# 浏览器打开 http://localhost:8080
+```
+
+**或仅后端 Docker + 本机 Vite 热更新：** 见 [docs/WEB.md](docs/WEB.md)。
+
 ## 主要 API
 
 | 方法 | 路径 | 说明 |
@@ -89,7 +102,9 @@ flutter run -d chrome   # 或 macos / android
 | `EMBEDDING_DIMENSIONS` | `1024` | 须与数据库向量维度一致 |
 
 若曾用 OpenAI 维度 1536 建过表，需 `docker compose down -v` 后重建数据库，或把 `EMBEDDING_DIMENSIONS` 设为 `1536` 并在请求中保持一致。
-- **前端**: Flutter 3.24, Riverpod, GoRouter, Dio
+- **App**: Flutter 3.24, Riverpod, GoRouter, Dio
+- **Web**: React 18, Vite 5, TypeScript, React Router
+- **小程序**: 微信原生
 
 ## 并行开发建议
 

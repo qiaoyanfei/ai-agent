@@ -1,0 +1,107 @@
+.loading-wrap {
+  padding: 120rpx;
+  text-align: center;
+}
+
+.spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border: 4rpx solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.top-card {
+  margin: 24rpx 32rpx;
+  padding: 32rpx;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  border-radius: 24rpx;
+  color: #fff;
+  box-shadow: 0 8rpx 32rpx rgba(79, 70, 229, 0.35);
+}
+
+.top-title {
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.top-stats {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+.chat-entry {
+  margin-top: 28rpx;
+  width: 100%;
+  background: #fff !important;
+  color: var(--primary) !important;
+  font-weight: 600;
+}
+
+.chat-entry[disabled] {
+  opacity: 0.7;
+  color: #94a3b8 !important;
+}
+
+.doc-list {
+  height: calc(100vh - 320rpx);
+  padding: 0 32rpx;
+}
+
+.doc-card {
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid var(--border);
+}
+
+.doc-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.doc-status {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+}
+
+.edit-hint {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--primary);
+}
+
+.doc-err {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--danger);
+}
+
+.doc-del {
+  color: var(--danger);
+  font-size: 26rpx;
+  padding: 12rpx 8rpx;
+  margin-left: 16rpx;
+}
+
+.list-pad {
+  height: 140rpx;
+}

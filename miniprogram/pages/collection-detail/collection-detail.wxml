@@ -1,0 +1,43 @@
+<view class="page">
+  <view class="top-card" wx:if="{{!loading}}">
+    <view class="top-title">{{collectionName}}</view>
+    <view class="top-stats">{{documents.length}} 个文档 · {{readyCount}} 个可问答</view>
+    <button
+      class="btn-primary chat-entry"
+      disabled="{{readyCount === 0}}"
+      bindtap="openChat"
+    >
+      ✨ {{readyCount > 0 ? '开始 AI 问答' : '请先上传并等待文档就绪'}}
+    </button>
+  </view>
+
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="spinner" />
+  </view>
+
+  <view class="empty-wrap" wx:elif="{{documents.length === 0}}">
+    <view class="empty-icon">📄</view>
+    <view class="empty-title">还没有文档</view>
+    <view class="empty-sub">支持 PDF、TXT、Markdown</view>
+    <button class="btn-primary" style="margin-top:40rpx;width:320rpx;" bindtap="showAddMenu">添加文档</button>
+  </view>
+
+  <scroll-view wx:else scroll-y class="doc-list" refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onPullRefresh">
+    <view class="doc-card" wx:for="{{documents}}" wx:key="id">
+      <view
+        class="doc-main"
+        data-id="{{item.id}}"
+        bindtap="openDocument"
+      >
+        <view class="doc-name">{{item.filename}}</view>
+        <view class="doc-status {{item.statusClass}}">{{item.statusLabel}}</view>
+        <view class="edit-hint" wx:if="{{item.editable}}">点击编辑</view>
+        <view class="doc-err" wx:if="{{item.status === 'failed' && item.error_message}}">{{item.error_message}}</view>
+      </view>
+      <view class="doc-del" data-id="{{item.id}}" data-name="{{item.filename}}" bindtap="confirmDelete">删除</view>
+    </view>
+    <view class="list-pad" />
+  </scroll-view>
+
+  <view class="fab" bindtap="showAddMenu" wx:if="{{!loading}}">＋ 添加</view>
+</view>

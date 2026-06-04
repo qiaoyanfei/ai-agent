@@ -1,0 +1,36 @@
+<view class="page preview-page">
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="spinner" />
+    <text>加载中…</text>
+  </view>
+
+  <view class="err banner-err" wx:elif="{{error}}">{{error}}</view>
+
+  <block wx:elif="{{source}}">
+    <view class="meta-card">
+      <view class="meta-title">{{source.filename}}</view>
+      <view class="meta-sub" wx:if="{{source.file_type === 'pdf'}}">PDF · 第 {{pageLabel}} 页附近</view>
+      <view class="meta-sub" wx:else>文本 · 高亮为引用片段</view>
+      <button wx:if="{{source.file_type === 'pdf'}}" class="btn-primary open-pdf" bindtap="openPdf">在系统阅读器中打开 PDF</button>
+    </view>
+
+    <scroll-view scroll-y class="preview-body" wx:if="{{source.file_type !== 'pdf'}}">
+      <view class="text-block">
+        <text user-select wx:if="{{before}}">{{before}}</text>
+        <view class="highlight-box">
+          <text user-select>{{highlight}}</text>
+        </view>
+        <text user-select wx:if="{{after}}">{{after}}</text>
+      </view>
+    </scroll-view>
+
+    <view class="pdf-hint" wx:else>
+      <view class="empty-icon">📑</view>
+      <view class="empty-sub">小程序内 PDF 高亮预览受限，可点击上方按钮用系统阅读器查看完整文件。</view>
+      <view class="excerpt-box" wx:if="{{excerpt}}">
+        <view class="excerpt-label">引用摘录</view>
+        <text user-select>{{excerpt}}</text>
+      </view>
+    </view>
+  </block>
+</view>

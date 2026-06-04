@@ -88,6 +88,34 @@ class ApiClient {
     await _dio.delete('/documents/$documentId');
   }
 
+  Future<Map<String, dynamic>> createTextDocument(
+    int collectionId,
+    String filename,
+    String content,
+  ) async {
+    final res = await _dio.post(
+      '/collections/$collectionId/documents/text',
+      data: {'filename': filename, 'content': content},
+    );
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  Future<Map<String, dynamic>> getDocumentContent(int documentId) async {
+    final res = await _dio.get('/documents/$documentId/content');
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
+  Future<Map<String, dynamic>> updateDocumentContent(
+    int documentId,
+    String content,
+  ) async {
+    final res = await _dio.put(
+      '/documents/$documentId/content',
+      data: {'content': content},
+    );
+    return Map<String, dynamic>.from(res.data as Map);
+  }
+
   Future<List<dynamic>> listConversations(int collectionId) async {
     final res = await _dio.get(
       '/chat/conversations',

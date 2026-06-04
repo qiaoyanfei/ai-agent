@@ -1,0 +1,219 @@
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #eef2ff;
+  --surface: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
+  --radius: 12px;
+  --shadow: 0 2px 16px rgba(15, 23, 42, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.cite-link {
+  color: var(--primary);
+  font-weight: 600;
+  margin: 0 2px;
+}
+
+.cite-disabled {
+  color: var(--text-secondary);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #6366f1);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.btn-ghost {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.btn-danger-text {
+  background: none;
+  color: var(--danger);
+  padding: 8px 12px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+
+.card-clickable {
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.card-clickable:hover {
+  box-shadow: 0 4px 24px rgba(79, 70, 229, 0.12);
+}
+
+.err {
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.status-ready {
+  color: var(--success);
+}
+.status-pending {
+  color: var(--warning);
+}
+.status-failed {
+  color: var(--danger);
+}
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-header {
+  background: linear-gradient(135deg, var(--primary), #6366f1);
+  color: #fff;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.layout-header a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.layout-main {
+  flex: 1;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+}
+
+@media (min-width: 640px) {
+  .modal-backdrop {
+    align-items: center;
+  }
+}
+
+.modal {
+  background: var(--card);
+  border-radius: 16px 16px 0 0;
+  padding: 24px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+@media (min-width: 640px) {
+  .modal {
+    border-radius: 16px;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

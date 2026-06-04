@@ -1,0 +1,12 @@
+{
+  "description": "知库 — 若从仓库根目录打开开发者工具，请用本配置",
+  "miniprogramRoot": "miniprogram/",
+  "compileType": "miniprogram",
+  "appid": "wx109c000e1b6615f4",
+  "projectname": "mindvault",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "minified": true
+  }
+}

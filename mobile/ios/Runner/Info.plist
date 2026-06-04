@@ -50,5 +50,7 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>知库需要访问同一 WiFi 下的服务器，用于登录、上传文档与智能问答。</string>
 </dict>
 </plist>

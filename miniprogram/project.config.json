@@ -1,0 +1,44 @@
+{
+  "description": "知库微信小程序",
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "pages/home" },
+      { "type": "suffix", "value": ".md" },
+      { "type": "file", "value": ".DS_Store" }
+    ],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "minified": true,
+    "postcss": false,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "enhance": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "ignoreDevUnusedFiles": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.5.5",
+  "appid": "wx109c000e1b6615f4",
+  "projectname": "mindvault-miniprogram",
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
+}

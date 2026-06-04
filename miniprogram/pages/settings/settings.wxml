@@ -1,0 +1,25 @@
+<view class="page settings-page">
+  <view class="profile card">
+    <view class="profile-avatar">{{avatarLetter}}</view>
+    <view>
+      <view class="profile-email">{{email}}</view>
+      <view class="profile-sub">知库账号</view>
+    </view>
+  </view>
+
+  <view class="section-title">关于</view>
+  <view class="card settings-item">
+    <text>应用</text>
+    <text class="muted">知库 MindVault 小程序</text>
+  </view>
+  <view class="card settings-item">
+    <text>能力</text>
+    <text class="muted">知识库 · 文档 · AI 问答 · 引用预览</text>
+  </view>
+  <view class="card settings-item">
+    <text>API</text>
+    <text class="muted api-url">{{apiHost}}</text>
+  </view>
+
+  <button class="logout-btn" bindtap="confirmLogout">退出登录</button>
+</view>
